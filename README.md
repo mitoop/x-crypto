@@ -1,6 +1,6 @@
 # X Crypto
 
-A PHP package for managing and creating token instances for various blockchains. This package provides a unified interface for interacting with different tokens (ERC20, BEP20, etc.) across various blockchain networks.
+A PHP package for managing and creating token instances for various blockchains. This package provides a unified interface for interacting with different tokens (`ERC20`, `BEP20`, `Polygon`, `TRC20`, etc.) across various blockchain networks.
 
 ## Features
 
