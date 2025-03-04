@@ -14,10 +14,14 @@
     ],
     "require": {
         "php": "^8.3",
+        "ext-bcmath": "*",
+        "ext-gmp": "*",
         "simplito/elliptic-php": "^1.0",
         "kornrunner/keccak": "^1.1",
         "guzzlehttp/guzzle": "^7.9",
         "kornrunner/ethereum-offline-raw-tx": "^0.8.0",
-        "kornrunner/ethereum-token": "^0.1.0"
+        "kornrunner/ethereum-token": "^0.1.0",
+        "stephenhill/base58": "^1.1",
+        "kornrunner/secp256k1": "^0.3.0"
     }
 }
