@@ -15,4 +15,16 @@ abstract class Chain implements ChainInterface
     {
         return $this->config[$key] ?? $default;
     }
+
+    public function getGuzzleOptions(): array
+    {
+        return [
+            'base_uri' => $this->config['rpc_endpoint'],
+            'timeout' => 60,
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ],
+        ];
+    }
 }

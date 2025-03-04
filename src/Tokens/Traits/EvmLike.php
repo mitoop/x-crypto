@@ -26,7 +26,7 @@ trait EvmLike
 
         $response = $this->rpcRequest('eth_call', [
             [
-                'to' => $this->config('token_address'),
+                'to' => $this->config('contract_address'),
                 'data' => $data,
             ],
             'latest',
@@ -79,7 +79,7 @@ trait EvmLike
             [
                 'fromBlock' => $params['latest_block_num'] ?? '0x0', // 十六进制如 "0x2e2a650"
                 'toBlock' => 'latest',
-                'address' => $this->config('token_address'),
+                'address' => $this->config('contract_address'),
                 'topics' => [$topic0, null, $topic2],
             ],
         ]);
@@ -202,7 +202,7 @@ trait EvmLike
                 &&
                 $log['topics'][0] === '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
                 &&
-                strtolower($log['address']) === strtolower($this->config('token_address'))
+                strtolower($log['address']) === strtolower($this->config('contract_address'))
                 &&
                 ! $log['removed']
             ) {
@@ -261,7 +261,7 @@ trait EvmLike
 
         $transferBuilder = new TransferBuilder;
         $gasPrice = $this->getGasPrice();
-        $estimatedGas = $this->estimateGas($fromAddress, $this->config('token_address'), $transferBuilder->encodeAbi($toAddress, $amount));
+        $estimatedGas = $this->estimateGas($fromAddress, $this->config('contract_address'), $transferBuilder->encodeAbi($toAddress, $amount));
         $gasLimit = bcmul($estimatedGas, 1.2);
         $gasLimit = bcdiv($gasLimit, '1', 0);
         $gasLimit = '0x'.gmp_strval(gmp_init($gasLimit, 10), 16);
@@ -287,7 +287,7 @@ trait EvmLike
      */
     protected function createLegacyTransaction($fromPrivateKey, $nonce, $gasPrice, $gasLimit, $data): string
     {
-        $transaction = new EvmLegacyTransaction($nonce, $gasPrice, $gasLimit, $this->config('token_address'), data: $data);
+        $transaction = new EvmLegacyTransaction($nonce, $gasPrice, $gasLimit, $this->config('contract_address'), data: $data);
 
         $response = $this->rpcRequest('eth_sendRawTransaction', [
             '0x'.$transaction->getRaw($fromPrivateKey, $this->config('chain_id')),
@@ -315,7 +315,7 @@ trait EvmLike
             $maxPriorityFeePerGas,
             $maxFeePerGas,
             $gasLimit,
-            $this->config('token_address'),
+            $this->config('contract_address'),
             data: $data);
 
         $response = $this->rpcRequest('eth_sendRawTransaction', [
