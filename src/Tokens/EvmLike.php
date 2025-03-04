@@ -1,6 +1,6 @@
 <?php
 
-namespace Mitoop\XCrypto\Tokens\Traits;
+namespace Mitoop\XCrypto\Tokens;
 
 use Mitoop\XCrypto\Exceptions\AmountTooSmallException;
 use Mitoop\XCrypto\Exceptions\BalanceShortageException;
