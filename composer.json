@@ -1,0 +1,23 @@
+{
+    "name": "mitoop/x-crypto",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Mitoop\\XCrypto\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "mitoop",
+            "email": "me@mitoop.com"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "simplito/elliptic-php": "^1.0",
+        "kornrunner/keccak": "^1.1",
+        "guzzlehttp/guzzle": "^7.9",
+        "kornrunner/ethereum-offline-raw-tx": "^0.8.0",
+        "kornrunner/ethereum-token": "^0.1.0"
+    }
+}
