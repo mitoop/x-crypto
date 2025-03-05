@@ -10,7 +10,7 @@ use Mitoop\XCrypto\Transaction;
 use Mitoop\XCrypto\TransactionInfo;
 use Mitoop\XCrypto\Transfer\EvmEIP1559Transaction;
 use Mitoop\XCrypto\Transfer\EvmLegacyTransaction;
-use Mitoop\XCrypto\Transfer\TransferBuilder;
+use Mitoop\XCrypto\Transfer\EvmTransferBuilder;
 
 trait EvmLike
 {
@@ -259,7 +259,7 @@ trait EvmLike
             $amount = $balance;
         }
 
-        $transferBuilder = new TransferBuilder;
+        $transferBuilder = new EvmTransferBuilder;
         $gasPrice = $this->getGasPrice();
         $estimatedGas = $this->estimateGas($fromAddress, $this->config('contract_address'), $transferBuilder->encodeAbi($toAddress, $amount));
         $gasLimit = bcmul($estimatedGas, 1.2);

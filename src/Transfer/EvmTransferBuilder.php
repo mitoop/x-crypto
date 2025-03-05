@@ -4,7 +4,7 @@ namespace Mitoop\XCrypto\Transfer;
 
 use kornrunner\Ethereum\Token;
 
-class TransferBuilder extends Token
+class EvmTransferBuilder extends Token
 {
     public function encodeAbi(string $toAddress, $amount): string
     {
