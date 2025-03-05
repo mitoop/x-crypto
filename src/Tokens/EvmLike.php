@@ -37,7 +37,7 @@ trait EvmLike
 
     public function convertAmount($rawAmount, $decimal = null): string
     {
-        $decimal = $decimal ?? $this->config('token_decimals');
+        $decimal = $decimal ?? $this->config('decimal');
 
         $amount = gmp_strval(gmp_init($rawAmount, 16));
 
@@ -97,7 +97,7 @@ trait EvmLike
                 $this->normalizeAddress($item['topics'][2]),
                 $item['data'],
                 $this->removeTrailingZeros($this->convertAmount($item['data'])),
-                $this->config('token_decimals'),
+                $this->config('decimal'),
             );
         }
 
@@ -247,7 +247,7 @@ trait EvmLike
 
         $balance = $this->getTokenBalance($fromAddress);
 
-        if (bccomp($balance, $amount, $this->config('token_decimals')) === -1) {
+        if (bccomp($balance, $amount, $this->config('decimal')) === -1) {
             if (! $allowPartial) {
                 throw new BalanceShortageException(sprintf('balance: %s, amount: %s', $balance, $amount));
             }
@@ -272,7 +272,7 @@ trait EvmLike
         }
 
         $nonce = $this->getTransactionCount($fromAddress);
-        $hexAmount = $transferBuilder->hexAmount($amount, $this->config('token_decimals'));
+        $hexAmount = $transferBuilder->hexAmount($amount, $this->config('decimal'));
         $data = $transferBuilder->getTransferData($toAddress, $hexAmount);
 
         if (! $this->supportsEIP1559Transaction()) {
@@ -329,6 +329,6 @@ trait EvmLike
 
     protected function isBelowMinimumAmount(string $amount): bool
     {
-        return bccomp($amount, '0.01', $this->config('token_decimals')) <= 0;
+        return bccomp($amount, '0.01', $this->config('decimal')) <= 0;
     }
 }

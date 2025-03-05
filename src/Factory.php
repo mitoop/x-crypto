@@ -13,7 +13,7 @@ class Factory
      *      chain: string,
      *      contract: string,
      *      token: string,
-     *      token_decimals: int,
+     *      decimal: int,
      *      contract_address: string,
      *      chain_id: int,
      *      rpc_endpoint: string
@@ -23,7 +23,7 @@ class Factory
      */
     public static function create(array $config): TokenInterface|EvmTokenInterface
     {
-        $requiredKeys = ['chain', 'contract', 'token', 'token_decimals', 'contract_address', 'chain_id', 'rpc_endpoint'];
+        $requiredKeys = ['chain', 'contract', 'token', 'decimal', 'contract_address', 'chain_id', 'rpc_endpoint'];
         foreach ($requiredKeys as $key) {
             if (empty($config[$key])) {
                 $chain = $config['chain'] ?? 'unknown chain';
