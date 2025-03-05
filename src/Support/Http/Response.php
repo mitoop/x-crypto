@@ -31,7 +31,6 @@ class Response
         $target = $this->decoded;
 
         foreach ($keys as $segment) {
-            $segment = is_numeric($segment) ? (int) $segment : $segment;
             if (array_key_exists($segment, $target)) {
                 $target = $target[$segment];
             } else {
