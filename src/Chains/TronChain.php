@@ -4,5 +4,8 @@ namespace Mitoop\XCrypto\Chains;
 
 class TronChain extends Chain
 {
-    public function getChainId(): int {}
+    public function getChainId(): int
+    {
+        return 0;
+    }
 }
