@@ -26,8 +26,9 @@ class Factory
         $requiredKeys = ['chain', 'contract', 'token', 'decimal', 'contract_address', 'chain_id', 'rpc_endpoint'];
         foreach ($requiredKeys as $key) {
             if (empty($config[$key])) {
-                $chain = $config['chain'] ?? 'unknown chain';
-                throw new InvalidArgumentException("Missing required configuration key: '{$key}' for chain: '{$chain}'.");
+                throw new InvalidArgumentException(
+                    sprintf("Missing '%s' in config for chain: %s.", $key, $config['chain'] ?? 'unknown')
+                );
             }
         }
 
@@ -38,7 +39,9 @@ class Factory
         $class = sprintf('%s\\Tokens\\%s\\%s\\%s', __NAMESPACE__, $chain, $contract, $token);
 
         if (! class_exists($class)) {
-            throw new InvalidArgumentException("Unable to locate the Token API class for token '{$config['token']}' on the '{$config['chain']}' chain.");
+            throw new InvalidArgumentException(
+                sprintf('Token class not found for %s/%s/%s', $chain, $contract, $token)
+            );
         }
 
         return new $class($config);
