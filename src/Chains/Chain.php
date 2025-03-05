@@ -3,7 +3,10 @@
 namespace Mitoop\XCrypto\Chains;
 
 use Mitoop\XCrypto\Contracts\ChainInterface;
+use Mitoop\XCrypto\Exceptions\InvalidArgumentException;
 use Mitoop\XCrypto\Support\Http\HttpRequestClient;
+use Mitoop\XCrypto\Wallets\Factory;
+use Mitoop\XCrypto\Wallets\Wallet;
 
 abstract class Chain implements ChainInterface
 {
@@ -14,6 +17,22 @@ abstract class Chain implements ChainInterface
     public function config(string $key, $default = null)
     {
         return $this->config[$key] ?? $default;
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function generateWallet(): Wallet
+    {
+        return Factory::create($this->config('chain'))->generate();
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function validateAddress(string $address): bool
+    {
+        return Factory::create($this->config('chain'))->validate($address);
     }
 
     public function getGuzzleOptions(): array

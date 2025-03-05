@@ -2,11 +2,8 @@
 
 namespace Mitoop\XCrypto\Chains\Traits;
 
-use Mitoop\XCrypto\Exceptions\InvalidArgumentException;
 use Mitoop\XCrypto\Exceptions\RpcException;
 use Mitoop\XCrypto\Responses\EvmLikeResponse;
-use Mitoop\XCrypto\Wallets\Factory;
-use Mitoop\XCrypto\Wallets\Wallet;
 
 /**
  * @method EvmLikeResponse postJson(string $url, array $data = [], array $options = [])
@@ -21,22 +18,6 @@ trait EvmLike
         $response = $this->rpcRequest('eth_chainId');
 
         return hexdec($response->json('result'));
-    }
-
-    /**
-     * @throws InvalidArgumentException
-     */
-    public function generateWallet(): Wallet
-    {
-        return Factory::create($this->config('chain'))->generate();
-    }
-
-    /**
-     * @throws InvalidArgumentException
-     */
-    public function validateAddress(string $address): bool
-    {
-        return Factory::create($this->config('chain'))->validate($address);
     }
 
     public function getNativeTokenDecimal(): int
