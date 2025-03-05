@@ -6,8 +6,6 @@ use Psr\Http\Message\ResponseInterface;
 
 class Response
 {
-    use DeterminesStatusCode;
-
     protected mixed $decoded;
 
     public function __construct(protected ResponseInterface $response) {}
@@ -56,14 +54,14 @@ class Response
         return $this->response->getStatusCode();
     }
 
+    public function ok(): bool
+    {
+        return $this->status() === 200;
+    }
+
     public function successful(): bool
     {
         return $this->status() >= 200 && $this->status() < 300;
-    }
-
-    public function toPsrResponse()
-    {
-        return $this->response;
     }
 
     public function __call($method, $parameters)
