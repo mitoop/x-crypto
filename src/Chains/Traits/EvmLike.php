@@ -6,7 +6,7 @@ use Mitoop\XCrypto\Exceptions\RpcException;
 use Mitoop\XCrypto\Responses\EvmLikeResponse;
 
 /**
- * @method EvmLikeResponse postJson(string $url, array $data = [], array $options = [])
+ * @method EvmLikeResponse postJson($endpoint, $jsonData = [], $headers = [])
  */
 trait EvmLike
 {
