@@ -5,6 +5,7 @@ namespace Mitoop\XCrypto\Wallets;
 use Elliptic\EC;
 use kornrunner\Keccak;
 use StephenHill\Base58;
+use Throwable;
 
 class TronWallet implements WalletInterface
 {
@@ -38,5 +39,31 @@ class TronWallet implements WalletInterface
         return (new Base58)->encode($address);
     }
 
-    public function validate(string $address): bool {}
+    public function validate(string $address): bool
+    {
+        try {
+            $decoded = (new Base58)->decode($address);
+            $decodedHex = bin2hex($decoded);
+
+            if (strlen($decodedHex) !== 50) {
+                return false;
+            }
+
+            $prefix = substr($decodedHex, 0, 2);
+            if ($prefix !== '41') {
+                return false;
+            }
+
+            $addressData = substr($decoded, 0, 21);
+            $checksum = substr($decoded, 21, 4);
+
+            $hash0 = hash('sha256', $addressData, true);
+            $hash1 = hash('sha256', $hash0, true);
+            $validChecksum = substr($hash1, 0, 4);
+
+            return $checksum === $validChecksum;
+        } catch (Throwable) {
+            return false;
+        }
+    }
 }
