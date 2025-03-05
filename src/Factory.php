@@ -24,6 +24,7 @@ class Factory
     public static function create(array $config): TokenInterface|EvmTokenInterface
     {
         $requiredKeys = ['chain', 'contract', 'token', 'decimal', 'contract_address', 'chain_id', 'rpc_endpoint'];
+
         foreach ($requiredKeys as $key) {
             if (empty($config[$key])) {
                 throw new InvalidArgumentException(
@@ -32,9 +33,10 @@ class Factory
             }
         }
 
-        $chain = ucfirst(strtolower($config['chain']));
-        $contract = ucfirst(strtolower($config['contract']));
-        $token = ucfirst(strtolower($config['token']));
+        [$chain, $contract, $token] = array_map(
+            fn ($value) => ucfirst(strtolower($value)),
+            [$config['chain'], $config['contract'], $config['token']]
+        );
 
         $class = sprintf('%s\\Tokens\\%s\\%s\\%s', __NAMESPACE__, $chain, $contract, $token);
 
