@@ -86,7 +86,7 @@ trait EvmLike
 
         $transactions = [];
         foreach ($response->json('result') as $item) {
-            if ($item['removed']) {
+            if ($item['removed'] || ! $item['blockNumber']) {
                 continue;
             }
 
