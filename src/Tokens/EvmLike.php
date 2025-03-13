@@ -2,8 +2,8 @@
 
 namespace Mitoop\XCrypto\Tokens;
 
-use Mitoop\XCrypto\Exceptions\AmountTooSmallException;
 use Mitoop\XCrypto\Exceptions\BalanceShortageException;
+use Mitoop\XCrypto\Exceptions\CryptoException;
 use Mitoop\XCrypto\Exceptions\GasShortageException;
 use Mitoop\XCrypto\Exceptions\RpcException;
 use Mitoop\XCrypto\Transaction;
@@ -234,15 +234,48 @@ trait EvmLike
     }
 
     /**
+     * @throws BalanceShortageException
+     * @throws GasShortageException
+     * @throws RpcException
+     */
+    public function sendNativeTransaction($fromAddress, $fromPrivateKey, $toAddress, $amount): string
+    {
+        $balance = $this->getNativeBalance($fromAddress);
+
+        if (bccomp($balance, $amount, $this->getNativeTokenDecimal()) <= 0) {
+            throw new BalanceShortageException(sprintf('balance: %s, amount: %s', $balance, $amount));
+        }
+
+        $gasPrice = $this->getGasPrice();
+        $estimatedGas = $this->estimateGas($fromAddress, $this->config('token_address'), (new EvmTransferBuilder)->encodeAbi($toAddress, $amount));
+        $gasLimit = bcmul($estimatedGas, 1.2);
+        $gasLimit = bcdiv($gasLimit, '1', 0);
+        $gasLimit = '0x'.gmp_strval(gmp_init($gasLimit, 10), 16);
+
+        if (bccomp($balance, $fee = bcadd($amount, bcmul($gasPrice, $estimatedGas), $this->getNativeTokenDecimal())) < 0) {
+            throw new GasShortageException(sprintf('balance: %s, fee: %s', $balance, $fee));
+        }
+
+        $nonce = $this->getTransactionCount($fromAddress);
+        $amount = '0x'.gmp_strval(gmp_init($amount, 10), 16);
+
+        if (! $this->supportsEIP1559Transaction()) {
+            return $this->createLegacyTransaction($fromPrivateKey, $nonce, $gasPrice, $gasLimit, $toAddress, $amount);
+        }
+
+        return $this->createEIP1559Transaction($fromPrivateKey, $nonce, $gasLimit, $toAddress, $amount);
+    }
+
+    /**
      * @throws RpcException
      * @throws GasShortageException
      * @throws BalanceShortageException
-     * @throws AmountTooSmallException
+     * @throws CryptoException
      */
-    public function transfer($fromAddress, $fromPrivateKey, $toAddress, $amount, $allowPartial = false): string
+    public function sendTransaction($fromAddress, $fromPrivateKey, $toAddress, $amount, $allowPartial = false): string
     {
-        if ($this->isBelowMinimumAmount($amount)) {
-            throw new AmountTooSmallException(sprintf('amount: %s', $amount));
+        if ($amount <= 0) {
+            throw new CryptoException('Invalid amount');
         }
 
         $balance = $this->getTokenBalance($fromAddress);
@@ -276,18 +309,25 @@ trait EvmLike
         $data = $transferBuilder->getTransferData($toAddress, $hexAmount);
 
         if (! $this->supportsEIP1559Transaction()) {
-            return $this->createLegacyTransaction($fromPrivateKey, $nonce, $gasPrice, $gasLimit, $data);
+            return $this->createLegacyTransaction($fromPrivateKey, $nonce, $gasPrice, $gasLimit, $this->config('token_address'), data: $data);
         }
 
-        return $this->createEIP1559Transaction($fromPrivateKey, $nonce, $gasLimit, $data);
+        return $this->createEIP1559Transaction($fromPrivateKey, $nonce, $gasLimit, $this->config('token_address'), data: $data);
     }
 
     /**
      * @throws RpcException
      */
-    protected function createLegacyTransaction($fromPrivateKey, $nonce, $gasPrice, $gasLimit, $data): string
+    protected function createLegacyTransaction(
+        string $fromPrivateKey,
+        string $nonce,
+        string $gasPrice,
+        string $gasLimit,
+        string $to = '',
+        string $value = '',
+        string $data = ''): string
     {
-        $transaction = new EvmLegacyTransaction($nonce, $gasPrice, $gasLimit, $this->config('contract_address'), data: $data);
+        $transaction = new EvmLegacyTransaction($nonce, $gasPrice, $gasLimit, $to, $value, $data);
 
         $response = $this->rpcRequest('eth_sendRawTransaction', [
             '0x'.$transaction->getRaw($fromPrivateKey, $this->config('chain_id')),
@@ -301,7 +341,13 @@ trait EvmLike
     /**
      * @throws RpcException
      */
-    protected function createEIP1559Transaction($fromPrivateKey, $nonce, $gasLimit, $data): string
+    protected function createEIP1559Transaction(
+        string $fromPrivateKey,
+        string $nonce,
+        string $gasLimit,
+        string $to = '',
+        string $value = '',
+        string $data = ''): string
     {
         [$baseFeePerGas, $maxPriorityFeePerGas] = $this->getBaseFeePerGas();
         $baseFeeWei = gmp_strval(gmp_init($baseFeePerGas, 16));
@@ -315,8 +361,9 @@ trait EvmLike
             $maxPriorityFeePerGas,
             $maxFeePerGas,
             $gasLimit,
-            $this->config('contract_address'),
-            data: $data);
+            $to,
+            $value,
+            $data);
 
         $response = $this->rpcRequest('eth_sendRawTransaction', [
             '0x'.$transaction->getRaw($fromPrivateKey, $this->config('chain_id')),

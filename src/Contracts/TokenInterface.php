@@ -14,7 +14,9 @@ interface TokenInterface extends ChainInterface
 
     public function getTransaction(string $txId): ?TransactionInfo;
 
-    public function transfer($fromAddress, $fromPrivateKey, $toAddress, $amount, $allowPartial = false): string;
+    public function sendNativeTransaction($fromAddress, $fromPrivateKey, $toAddress, $amount): string;
+
+    public function sendTransaction($fromAddress, $fromPrivateKey, $toAddress, $amount, $allowPartial = false): string;
 
     public function convertAmount($rawAmount, $decimal = null): string;
 }
