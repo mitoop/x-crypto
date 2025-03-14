@@ -194,7 +194,7 @@ trait EvmLike
         }
 
         $amount = 0;
-        $from = '';
+        $from = $response->json('result.from');
         $to = '';
         $logs = $response->json('result.logs', []);
         foreach ($logs as $log) {
@@ -207,9 +207,8 @@ trait EvmLike
                 ! $log['removed']
             ) {
                 $amount = $this->convertAmount($log['data'] ?? '0x0');
-                $from = $this->normalizeAddress($log['topics'][1]);
+                // $from = $this->normalizeAddress($log['topics'][1]);
                 $to = $this->normalizeAddress($log['topics'][2]);
-                break;
             }
         }
 
@@ -226,7 +225,7 @@ trait EvmLike
         return new TransactionInfo(
             true,
             (string) $response->json('result.transactionHash'),
-            $from,
+            (string) $from,
             $to,
             $this->removeTrailingZeros((string) $amount),
             $fee,
